@@ -1,4 +1,5 @@
 import {createHostRootFiber} from './ReactFiber';
+import {initializeUpdateQueue} from './ReactUpdateQueue';
 
 export function createFiberRootOnContainer(container){
     const root = new FiberNodeRoot(container)
@@ -6,6 +7,7 @@ export function createFiberRootOnContainer(container){
     const hostRoot = createHostRootFiber();
     root.current = hostRoot;
     hostRoot.stateNode = root;
+    initializeUpdateQueue(hostRoot);
     return root;
 }
 

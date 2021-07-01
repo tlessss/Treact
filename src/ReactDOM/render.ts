@@ -1,4 +1,5 @@
 import {createFiberRootOnContainer} from '../Reconciler/ReactFiberRoot';
+import {updateContainer} from '../Reconciler/ReactFiberReconciler';
 const ROOT_PARAMER = '__reactRoot'
 
 
@@ -8,5 +9,5 @@ export const render = (element,container)=>{
     if(!root){
         root = container[ROOT_PARAMER] = createFiberRootOnContainer(container);
     }
-    console.log(root,'fiber root');
+    updateContainer(element,root);
 }
