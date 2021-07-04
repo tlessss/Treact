@@ -1,6 +1,6 @@
 import { NoFlags } from "./ReactFiberFlags";
 import { Fiber } from "./ReactInternalTypes";
-import { HostRoot, WorkTag } from "./ReactWorkTags";
+import { ClassComponent, Fragment, HostComponent, HostRoot, HostText, IndeterminateComponent, WorkTag } from "./ReactWorkTags";
 
 export function createHostRootFiber(){
     // 只是要创建一个tag为hostRoot的fiberNode
@@ -38,6 +38,11 @@ function FiberNode(tag:WorkTag,pendingProps,key:string | null){
     this.alternate = null;
 }
 
+function shouldConstruct(Component:Function){
+    const prototype = Component.prototype;
+    return !!(prototype && prototype.isReactComponent)
+}
+
 export function createWorkInProgress(current:Fiber,pendingProps:any){
     // 创建和current一样的fiber
     let workInProgress = current.alternate;
@@ -63,4 +68,46 @@ export function createWorkInProgress(current:Fiber,pendingProps:any){
     workInProgress.index = current.index;
 
     return workInProgress;
+}
+
+export function createFiberFromFragment(elements,key){
+    const fiber = createFiber(Fragment,elements,key)
+    return fiber;
+}
+
+export function createFiberFromElement(element){
+    let owner = null;
+    const type = element.type;
+    const key = element.key;
+    const pendingProps = element.props;
+    const fiber = createFiberFromTypeAndProps(
+        type,
+        key,
+        pendingProps,
+        owner
+    )
+    return fiber;
+}
+
+export function createFiberFromTypeAndProps(type,key,pendingProps,owner){
+    let fiberTag = IndeterminateComponent;
+    let resolvedType = type;
+    if(typeof type === 'function'){
+        if(shouldConstruct(type)){
+            fiberTag = ClassComponent;
+        }
+    }else if(typeof type === 'string'){
+        fiberTag = HostComponent;
+    }else{
+        // 
+    }
+    const fiber = createFiber(fiberTag as WorkTag,pendingProps,key);
+    fiber.elementType = type;
+    fiber.type = resolvedType;
+    return fiber;
+}
+
+export function createFiberFromText(content:string){
+    const fiber = createFiber(HostText,content,null)
+    return fiber;
 }

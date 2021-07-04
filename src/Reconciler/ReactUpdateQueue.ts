@@ -71,5 +71,79 @@ export function processUpdateQueue(workInProgress:Fiber,props,instance){
     if(pending!==null){
         queue.shared.pending = null;
         
+        const lastPendingUpdate = pending;
+        const firstPendingUpdate = pending.next;
+
+        lastPendingUpdate.next = null;
+        if(lastBaseUpdate === null){
+            firstBaseUpdate = firstPendingUpdate
+        }else{
+            lastBaseUpdate.next = firstPendingUpdate
+        }
+        lastBaseUpdate = lastPendingUpdate
+
+    }
+
+    if(firstBaseUpdate!== null){
+        let newState = queue.baseState;
+        let newBaseState = null;
+        let newFirstBaseUpdate = null;
+        let newLastBaseUpdate = null;
+
+        let update = firstBaseUpdate;
+        do{
+            newState = getStateFromUpdate(
+                workInProgress,
+                queue,
+                update,
+                newState,
+                props,
+                instance
+            )
+            update = update.next;
+            if(update === null){
+                pending = queue.shared.pending;
+                if(pending === null) {
+                    break;
+                }else{
+
+                }
+
+            }
+        }while(true);
+        if(newLastBaseUpdate === null){
+            newBaseState = newState;
+        }
+        queue.baseState = newBaseState;
+        queue.firstBaseUpdate = newFirstBaseUpdate;
+        queue.lastBaseUpdate = newLastBaseUpdate;
+        workInProgress.memoizedState = newState;
+    }
+}
+
+function getStateFromUpdate(workInProgress:Fiber,queue,update:Update,prevState,nextProps,instance){
+    switch(update.tag){
+        case ReplaceState:{
+            const payload = update.payload;
+            if(typeof payload === 'function'){
+                const nextState = payload.call(instance,prevState,nextProps);
+                return nextState;
+            }
+            return payload;
+        }
+        case UpdateState:{
+            const payload = update.payload;
+            let partialState;
+            if(typeof payload === 'function'){
+                partialState = payload.call(instance,prevState,nextProps);
+            }else{
+                partialState = payload;
+            }
+
+            if(partialState === null || partialState === undefined){
+                return prevState;
+            }
+            return Object.assign({},prevState,partialState)
+        }
     }
 }
