@@ -35,7 +35,7 @@ function renderSyncRoot(root){
 
 function parpareParams(root){
     workInProgressRoot = root.stateNode;
-    workInProgress = createWorkInProgress(root);
+    workInProgress = createWorkInProgress(root,root.pendingProps);
     console.log(workInProgress,'work in progress');
 
     renderSyncLoop();
@@ -50,7 +50,18 @@ function renderSyncLoop(){
 
 function performUnitOfWork(unitOfWork:Fiber){
     let next = beginWork(unitOfWork);
-    workInProgress = null
+    console.log(next,'next');
+    
+    if(next !== null){
+        workInProgress = next;
+    }else{
+        // 进入completeUnitOfWork
+        workInProgress = null;
+    }
+}
+
+function completeUnitOfWork(unitOfWork){
+
 }
 
 function commitRoot(root){

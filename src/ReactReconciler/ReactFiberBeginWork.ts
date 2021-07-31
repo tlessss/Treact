@@ -1,7 +1,8 @@
 import { Fiber } from "../shared/ReactType";
-import { HostRoot } from "./ReactWorkTags";
+import { HostComponent, HostRoot } from "./ReactWorkTags";
 import {processUpdateQueue} from './ReactUpdateQueue';
 import {reconcileChildFiber} from './ReactChildFiber';
+import { REACT_ELEMENT_TYPE } from "../shared/ReactSymbols";
 
 export function beginWork(workInProgress:Fiber){
     console.log(workInProgress,'begin work');
@@ -9,6 +10,9 @@ export function beginWork(workInProgress:Fiber){
     switch(workInProgress.tag){
         case HostRoot:{
             return updateHostRoot(current,workInProgress);
+        };
+        case HostComponent:{
+            return updateHostComponent(current,workInProgress)
         }
     }
 }
@@ -21,5 +25,21 @@ function updateHostRoot(current,workInProgress){
     const nextChildren = nextState.element;
     const currentFirstChild = current === null ? null : current.child;
 
-    reconcileChildFiber(workInProgress,currentFirstChild,nextChildren)
+    const child = reconcileChildFiber(workInProgress,currentFirstChild,nextChildren)
+    
+    return child;
+}
+
+function updateHostComponent(current,workInProgress){
+    // ******
+    // 
+    console.log(workInProgress,'update host component');
+    
+    const props = workInProgress.pendingProps;
+    const {element} = props;
+    if(typeof element=== 'string' || typeof element === 'number'){
+
+    }
+    
+
 }
